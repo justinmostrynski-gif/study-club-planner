@@ -38,6 +38,11 @@ The passcode is stored privately in Cloudflare, never in the code. To change it 
 ### 4. Open it
 Your planner's address is shown on the Worker's page, something like `https://study-club-planner.<your-account>.workers.dev`. Open it, enter the passcode, and add your name. Then share the link and passcode with your developers.
 
+### Check that it's live
+- In Cloudflare, open the **study-club-planner** Worker › **Deployments**. The latest one should say **Success**.
+- On GitHub, each commit gets a green check (✓) once Cloudflare has deployed it.
+- Open your planner's address. You should see the **GOING DEEPER** passcode screen. If you see "Almost there," the `TEAM_PASSCODE` secret isn't set yet.
+
 ### If the first deploy says something about the database
 Cloudflare normally creates the database on its own. If the deploy log shows an error about `d1_databases` or `database_id`:
 1. In Cloudflare open **Storage & Databases** › **D1 SQL Database** › **Create**, and name it `study-club-planner-db`.
