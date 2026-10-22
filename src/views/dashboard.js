@@ -60,7 +60,7 @@ function projectMenu(p) {
       h("button", { onClick: act(() => Store.exportProject(p.id)) }, icon("download", 15), "Export project file"),
       h("button", { onClick: act(() => { const c = Store.duplicate(p.id); toast(`Duplicated as “${c.title}”.`, "ok"); }) }, icon("copy", 15), "Duplicate"),
       h("button", { onClick: act(() => Store.update(p.id, (x) => (x.status = x.status === "archived" ? "active" : "archived"))) }, icon("archive", 15), p.status === "archived" ? "Restore" : "Archive"),
-      h("button", { class: "danger", onClick: act(() => confirmModal({ title: "Delete this study club?", message: `“${p.title}” will be removed from this browser. Export the project file first if you might need it.`, confirm: "Delete", danger: true, onConfirm: () => Store.remove(p.id) })) }, icon("trash", 15), "Delete")
+      h("button", { class: "danger", onClick: act(() => confirmModal({ title: "Delete this study club?", message: Store.hosted ? `“${p.title}” will be removed for everyone on the team. Export the project file first if you might need it.` : `“${p.title}” will be removed from this browser. Export the project file first if you might need it.`, confirm: "Delete", danger: true, onConfirm: () => Store.remove(p.id) })) }, icon("trash", 15), "Delete")
     )
   );
 }
@@ -70,7 +70,7 @@ function projectCard(p) {
   const next = rep.currentStep ? STEP[rep.currentStep] : null;
   const pri = ROADS.filter((r) => p.roads[r.id].priority);
   const hasDest = filled(p.destination.what);
-  return h("a", { class: ["club-card", p.status === "archived" && "archived"], href: `#/p/${p.id}/${p.lastStep || "destination"}`, key: p.id },
+  return h("a", { class: ["club-card", p.status === "archived" && "archived"], href: `#/p/${p.id}/${Store.lastStep[p.id] || "destination"}`, key: p.id },
     h("div", { class: "cc-top" },
       h("div", { class: "cc-titles" }, h("h3", {}, p.title || "Untitled study club"), h("p", { class: "muted small" }, [p.topic, p.audience].filter(Boolean).join(" · ") || "No topic yet")),
       healthRing(rep.health),
@@ -168,7 +168,9 @@ function progressView() {
       ),
       h("div", { class: "how-share" },
         icon("info", 18, "#8CBEFF"),
-        h("div", {}, h("b", {}, "How team progress works. "), "Each developer’s work saves in their own browser. Developers export their project file (⋯ › Export project file) and drop it in your shared Teams or OneDrive folder. Import those files here to see where every club stands. Re-importing a newer file updates it.")
+        Store.hosted
+          ? h("div", {}, h("b", {}, "Live for the whole team. "), "Everyone works in this shared planner, so this page updates as developers move their study clubs forward. Have work from the standalone file? Import its project files to bring it in.")
+          : h("div", {}, h("b", {}, "How team progress works. "), "Each developer’s work saves in their own browser. Developers export their project file (⋯ › Export project file) and drop it in your shared Teams or OneDrive folder. Import those files here to see where every club stands. Re-importing a newer file updates it.")
       ),
       h("div", { class: "stat-row" },
         stat(rows.length, "Active study clubs"),
@@ -187,7 +189,7 @@ function progressView() {
                 h("tbody", {},
                   shown.map(({ p, rep }) =>
                     h("tr", { key: p.id, class: rep.atRisk ? "at-risk" : "" },
-                      h("td", {}, h("a", { href: `#/p/${p.id}/${p.lastStep || "destination"}`, class: "pt-title" }, p.title || "Untitled"), h("div", { class: "muted small" }, p.developer || "No developer")),
+                      h("td", {}, h("a", { href: `#/p/${p.id}/${Store.lastStep[p.id] || "destination"}`, class: "pt-title" }, p.title || "Untitled"), h("div", { class: "muted small" }, p.developer || "No developer")),
                       h("td", {}, p.sessionDate ? fmtDate(p.sessionDate, { month: "short", day: "numeric" }) : "–", h("div", { class: ["small", rep.atRisk ? "risk" : "muted"] }, rep.atRisk ? "At risk · " + daysLabel(rep.daysToSession) : p.sessionDate ? daysLabel(rep.daysToSession) : "")),
                       STEPS.map((s, i) => statusCell(rep, i, p)),
                       h("td", {}, h("div", { class: "cc-roads" }, ROADS.filter((r) => p.roads[r.id].priority).map((r) => roadTag(r.id, { small: true })))),

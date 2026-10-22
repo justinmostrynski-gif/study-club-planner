@@ -1,10 +1,12 @@
 {
   "name": "study-club-planner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Study Club Depth Flow: a standalone planner that walks training developers from concept to a stakeholder-informed depth design.",
+  "description": "Study Club Depth Flow: a team planner that walks training developers from concept to a stakeholder-informed depth design.",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview-hosted.mjs",
+    "deploy": "npx wrangler deploy"
   }
 }

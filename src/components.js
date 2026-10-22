@@ -56,8 +56,10 @@ function daysLabel(n) {
 // ---- header ----
 function saveIndicator() {
   const s = Store.saveState;
-  const label = s === "saving" ? "Saving…" : s === "error" ? "Not saved" : `Saved${Store.lastSavedAt ? " · " + timeAgo(Store.lastSavedAt.toISOString()) : ""}`;
-  return h("div", { class: `save-ind save-${s}`, title: Store.saveError || "Your work saves automatically in this browser." }, h("span", { class: "save-dot" }), label);
+  const saved = Store.hosted ? "Saved for the team" : "Saved";
+  const label = s === "saving" ? "Saving…" : s === "error" ? "Not saved" : s === "offline" ? "Offline · will retry" : `${saved}${Store.lastSavedAt ? " · " + timeAgo(Store.lastSavedAt.toISOString()) : ""}`;
+  const tip = Store.saveError || (Store.hosted ? "Your work saves automatically to the team planner." : "Your work saves automatically in this browser.");
+  return h("div", { class: `save-ind save-${s === "offline" ? "error" : s}`, title: tip }, h("span", { class: "save-dot" }), label);
 }
 
 function appHeader(active, extra) {
@@ -84,8 +86,8 @@ function userChip() {
 function nameModal() {
   const d = UI.draft;
   return modalShell(
-    "Who’s working?",
-    h("p", { class: "muted" }, "Your name is stamped on the study clubs you edit, so teammates can see who moved things forward."),
+    d.first ? "Welcome. Who’s working?" : "Who’s working?",
+    h("p", { class: "muted" }, "Your name is stamped on the study clubs you edit, so teammates can see who moved things forward. This browser remembers it."),
     h("form", { onSubmit: (e) => { e.preventDefault(); Store.setUserName(d.name || ""); closeModal(); } },
       h("input", { class: "input", autofocus: true, value: d.name, placeholder: "Your name", onInput: (e) => (d.name = e.target.value) }),
       h("div", { class: "modal-actions" }, h("button", { type: "button", class: "btn ghost", onClick: closeModal }, "Cancel"), h("button", { class: "btn gold", type: "submit" }, "Save"))

@@ -37,6 +37,7 @@ function projectBar(p, rep) {
           p.audience && h("span", {}, p.audience),
           h("span", {}, icon("calendar", 13), p.sessionDate ? `${fmtDate(p.sessionDate)} · ${daysLabel(rep.daysToSession)}` : "No session date"),
           p.developer && h("span", {}, icon("user", 13), p.developer),
+          p.updatedBy && h("span", { title: fmtDate(p.updatedAt) }, icon("clock", 13), `Last edit by ${p.updatedBy} · ${timeAgo(p.updatedAt)}`),
           h("button", { class: "link-btn", onClick: () => openModal(detailsModal(p), { title: p.title, topic: p.topic, audience: p.audience, sessionDate: p.sessionDate, developer: p.developer }) }, icon("pencil", 13), "Edit details")
         )
       ),
@@ -52,8 +53,8 @@ function projectBar(p, rep) {
 function projectView(id, stepId) {
   const p = Store.get(id);
   if (!p) return notFoundView();
-  if (!STEP[stepId] && stepId !== "blueprint") stepId = p.lastStep || "destination";
-  if (p.lastStep !== stepId) Store.quietUpdate(p.id, (x) => (x.lastStep = stepId));
+  if (!STEP[stepId] && stepId !== "blueprint") stepId = Store.lastStep[p.id] || "destination";
+  Store.setLastStep(p.id, stepId);
   const rep = projectReport(p);
 
   if (stepId === "blueprint") return blueprintView(p, rep);
@@ -92,5 +93,5 @@ function projectView(id, stepId) {
 
 function notFoundView() {
   return h("div", { class: "page" }, appHeader("clubs"),
-    h("section", { class: "content center pad" }, h("h2", {}, "That study club isn’t in this browser."), h("p", { class: "muted" }, "It may have been deleted, or it lives in a teammate’s browser. Ask them to export the project file, then import it."), h("a", { class: "btn gold", href: "#/" }, "Back to study clubs")));
+    h("section", { class: "content center pad" }, h("h2", {}, Store.hosted ? "That study club isn’t here." : "That study club isn’t in this browser."), h("p", { class: "muted" }, Store.hosted ? "It may have been deleted by a teammate." : "It may have been deleted, or it lives in a teammate’s browser. Ask them to export the project file, then import it."), h("a", { class: "btn gold", href: "#/" }, "Back to study clubs")));
 }

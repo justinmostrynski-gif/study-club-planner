@@ -13,10 +13,18 @@ function currentView() {
   return dashboardView();
 }
 
+function loadingView() {
+  return h("div", { class: "page" }, appHeader(""),
+    h("section", { class: "content center pad" },
+      Store.loadError
+        ? [h("h2", {}, "Can’t reach the team planner."), h("p", { class: "muted" }, Store.loadError), h("button", { class: "btn gold mt", onClick: () => location.reload() }, "Try again")]
+        : h("p", { class: "muted" }, "Loading your team’s study clubs…")));
+}
+
 function render() {
   const root = document.getElementById("app");
   const tree = h("div", { class: "app-root" },
-    currentView(),
+    Store.ready ? currentView() : loadingView(),
     UI.modal ? UI.modal() : null,
     UI.toast ? h("div", { class: `toast toast-${UI.toast.kind}`, role: "status" }, UI.toast.msg) : null
   );
@@ -52,8 +60,12 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && UI.modal) closeModal();
 });
 
-Store.load();
 Store.subscribe(render);
 render();
+Store.load().then(() => {
+  render();
+  // Hosted: everyone's name goes on their edits, so ask once.
+  if (Store.hosted && Store.ready && !Store.settings.userName) openModal(nameModal, { name: "", first: true });
+});
 // Keep "Saved · 2 min ago" honest.
 setInterval(render, 30000);

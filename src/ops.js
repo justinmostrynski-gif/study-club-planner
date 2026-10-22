@@ -1,0 +1,92 @@
+// Change operations. Instead of saving a whole study club on every keystroke,
+// the hosted app sends just what changed ("set this field", "add this item",
+// "remove that item"). Two people editing different parts of the same study
+// club both keep their work. Arrays of objects with an `id` are matched by id.
+//
+// Shared by the browser app and the server (build.mjs copies this file into
+// worker/ops.generated.js).
+
+function isIdArray(a) {
+  return Array.isArray(a) && a.every((x) => x && typeof x === "object" && typeof x.id === "string");
+}
+
+function sameValue(a, b) {
+  return a === b || JSON.stringify(a) === JSON.stringify(b);
+}
+
+function diffOps(before, after, path = []) {
+  if (sameValue(before, after)) return [];
+  const bothIdArrays = isIdArray(before) && isIdArray(after);
+  if (bothIdArrays) {
+    const ops = [];
+    const beforeById = new Map(before.map((x) => [x.id, x]));
+    const afterIds = new Set(after.map((x) => x.id));
+    before.forEach((x) => { if (!afterIds.has(x.id)) ops.push({ op: "remove", path, id: x.id }); });
+    after.forEach((x, i) => {
+      const prev = beforeById.get(x.id);
+      if (!prev) ops.push({ op: "insert", path, value: x, index: i });
+      else ops.push(...diffOps(prev, x, [...path, { id: x.id }]));
+    });
+    return ops;
+  }
+  const plainObjects = before && after && typeof before === "object" && typeof after === "object" && !Array.isArray(before) && !Array.isArray(after);
+  if (plainObjects) {
+    const ops = [];
+    for (const k of new Set([...Object.keys(before), ...Object.keys(after)])) ops.push(...diffOps(before[k], after[k], [...path, k]));
+    return ops;
+  }
+  return [{ op: "set", path, value: after }];
+}
+
+// Walk to the container a path points into. Returns null if something on the
+// way was removed by someone else, in which case the op is dropped.
+function resolvePath(doc, path) {
+  let cur = doc;
+  for (const seg of path) {
+    if (cur == null) return null;
+    if (seg && typeof seg === "object") cur = Array.isArray(cur) ? cur.find((x) => x && x.id === seg.id) : null;
+    else cur = cur[seg];
+  }
+  return cur === undefined ? null : cur;
+}
+
+function applyOps(doc, ops) {
+  for (const o of ops) {
+    if (o.op === "set") {
+      if (!o.path.length) continue;
+      const parent = resolvePath(doc, o.path.slice(0, -1));
+      const key = o.path[o.path.length - 1];
+      if (parent == null || typeof parent !== "object") continue;
+      if (key && typeof key === "object") {
+        if (!Array.isArray(parent)) continue;
+        const i = parent.findIndex((x) => x && x.id === key.id);
+        if (i >= 0) parent[i] = o.value;
+      } else parent[key] = o.value;
+    } else if (o.op === "insert") {
+      const arr = resolvePath(doc, o.path);
+      if (!Array.isArray(arr) || arr.some((x) => x && x.id === o.value.id)) continue;
+      arr.splice(Math.min(o.index ?? arr.length, arr.length), 0, o.value);
+    } else if (o.op === "remove") {
+      const arr = resolvePath(doc, o.path);
+      if (!Array.isArray(arr)) continue;
+      const i = arr.findIndex((x) => x && x.id === o.id);
+      if (i >= 0) arr.splice(i, 1);
+    }
+  }
+  return doc;
+}
+
+// Collapse repeated sets to the same field (typing a sentence = one op).
+function compactOps(ops) {
+  const out = [];
+  const lastSet = new Map();
+  for (const o of ops) {
+    if (o.op === "set") {
+      const k = JSON.stringify(o.path);
+      if (lastSet.has(k)) out[lastSet.get(k)] = null;
+      lastSet.set(k, out.length);
+    } else lastSet.clear();
+    out.push(o);
+  }
+  return out.filter(Boolean);
+}
