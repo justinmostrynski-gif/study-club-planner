@@ -1,0 +1,55 @@
+STUDY CLUB DEPTH FLOW: READ ME FIRST
+====================================
+
+WHAT THIS IS
+A planner that walks you from a study club idea to a deeper,
+stakeholder-informed design. It is one file. Nothing to install.
+
+
+HOW TO OPEN IT
+1. Move "Study-Club-Depth-Flow.html" to a folder you'll keep,
+   for example Documents\Study Club Planner.
+2. Double-click it. It opens in Microsoft Edge or Chrome.
+   (If Windows asks how to open it, choose Microsoft Edge.)
+3. Bookmark the page so you can get back to it easily.
+
+Always open the same file from the same place. If you move or
+rename it, your browser may not show your saved study clubs.
+(You can bring them back by importing your project files.)
+
+
+YOUR WORK SAVES AUTOMATICALLY
+Everything saves in your browser as you type. Look for
+"Saved" in the top right corner.
+
+Your work lives in this browser on this computer. To be safe,
+export your project files now and then (see below).
+Clearing your browser's history and site data can erase it.
+
+
+SHARING YOUR PROGRESS
+Inside a study club, click "Export file". Save the
+.depthflow.json file to your team's shared Teams or OneDrive
+folder. Your lead imports these files on the "Team progress"
+page to see where every study club stands.
+
+To move your work to another computer: export the file there,
+then open the planner on the new computer and click
+"Import project files".
+
+
+SHARING THE FINISHED DESIGN
+Open the Blueprint (gold button, top right of any study club).
+- "Download Word" makes a .docx you can edit and send.
+- "Print or save as PDF" opens your printer window. Choose
+  "Save as PDF" as the printer to make a PDF.
+
+
+THE FLOW
+01  Define the destination   Start with the behavior, not the topic
+02  Ask the roads            Interview your partners with five questions
+03  Prioritize few           Find the one or two missing roads
+04  Design for depth         Turn each priority road into design decisions
+ ✓  Prove + sustain          Measure it and reinforce it
+
+Design delivers the content. Galvanization creates the depth around it.

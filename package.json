@@ -1,0 +1,10 @@
+{
+  "name": "study-club-planner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Study Club Depth Flow: a standalone planner that walks training developers from concept to a stakeholder-informed depth design.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}
